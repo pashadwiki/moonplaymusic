@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MoonPlay Music</title>
+<style>
+  :root{
+    --bg:#0b0b14; --bg2:#12121f; --card:#1a1a2e; --card2:#22223a;
+    --text:#f5f3ff; --muted:#9d97b8; --accent:#a259ff; --accent2:#ffd76a;
+    --grad:linear-gradient(135deg,#a259ff,#5e2bff 55%,#2b1055);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Roboto,system-ui,sans-serif;overflow-x:hidden;padding-bottom:172px}
+  /* Header */
+  header{position:sticky;top:0;z-index:20;padding:16px 18px 10px;background:linear-gradient(180deg,rgba(11,11,20,.97),rgba(11,11,20,.85));backdrop-filter:blur(8px)}
+  .logo{display:flex;align-items:center;gap:10px}
+  .moon{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 18px rgba(162,89,255,.55)}
+  .logo h1{font-size:20px;letter-spacing:.3px}
+  .logo h1 span{color:var(--accent2)}
+  .tagline{font-size:11px;color:var(--muted);margin-top:1px}
+  /* Hero */
+  .hero{margin:8px 16px 4px;border-radius:18px;padding:18px;background:var(--grad);position:relative;overflow:hidden}
+  .hero h2{font-size:19px;line-height:1.3;max-width:75%}
+  .hero p{font-size:12px;opacity:.85;margin-top:5px;max-width:78%}
+  .hero .big{position:absolute;right:-8px;bottom:-22px;font-size:110px;opacity:.28}
+  /* Sections */
+  section{padding:12px 16px 2px}
+  section h3{font-size:16px;margin-bottom:10px}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:8px 14px;border-radius:999px;background:var(--card);color:var(--text);font-size:13px;border:1px solid #2c2c4a;cursor:pointer}
+  .chip.active{background:var(--accent);border-color:var(--accent);font-weight:600}
+  /* Track list */
+  .track{display:flex;align-items:center;gap:12px;padding:9px 8px;border-radius:12px;cursor:pointer}
+  .track:active{background:var(--card)}
+  .track.playing{background:var(--card)}
+  .track.playing .t-title{color:var(--accent2)}
+  .t-cover{width:50px;height:50px;border-radius:9px;object-fit:cover;background:var(--card2);flex:0 0 auto}
+  .t-info{flex:1;min-width:0}
+  .t-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .t-artist{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .t-dl{flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:1px solid #35355a;background:transparent;color:var(--accent2);font-size:16px;cursor:pointer}
+  .t-dl:active{background:var(--card2)}
+  .status{padding:22px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+  /* Search */
+  .searchbox{display:flex;gap:8px;margin:4px 16px 2px}
+  .searchbox input{flex:1;background:var(--card);border:1px solid #2c2c4a;border-radius:999px;padding:12px 16px;color:var(--text);font-size:14px;outline:none}
+  .searchbox button{background:var(--accent);color:#fff;border:none;border-radius:999px;padding:0 18px;font-size:14px;font-weight:600;cursor:pointer}
+  /* Views */
+  .view{display:none}
+  .view.active{display:block}
+  /* Player bar */
+  #player{position:fixed;left:8px;right:8px;bottom:66px;z-index:30;background:rgba(26,26,46,.97);border:1px solid #2e2e52;border-radius:16px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.55)}
+  #player .row{display:flex;align-items:center;gap:10px}
+  #p-cover{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--card2)}
+  #p-info{flex:1;min-width:0}
+  #p-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #p-artist{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-btn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--text);font-size:17px;cursor:pointer;flex:0 0 auto}
+  #p-play{background:var(--accent);color:#fff;font-size:16px;box-shadow:0 0 14px rgba(162,89,255,.5)}
+  #p-dl{color:var(--accent2);border:1px solid #35355a;font-size:15px}
+  #seek{width:100%;margin-top:8px;accent-color:var(--accent);height:20px}
+  .times{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:-3px}
+  /* Bottom nav */
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,14,24,.98);border-top:1px solid #23233f;display:flex}
+  nav button{flex:1;background:none;border:none;color:var(--muted);padding:9px 0 11px;font-size:11px;cursor:pointer}
+  nav button .ic{display:block;font-size:20px;margin-bottom:2px}
+  nav button.active{color:var(--accent2)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="moon">🌙</div>
+    <div>
+      <h1>Moon<span>Play</span> Music</h1>
+      <div class="tagline">Dengerin &amp; download musik gratis, legal, tanpa ribet.</div>
+    </div>
+  </div>
+</header>
+
+<!-- HOME -->
+<div id="view-home" class="view active">
+  <div class="hero">
+    <h2>Musik enak buat nemenin malam kamu 🎧</h2>
+    <p>Streaming langsung atau download buat didengerin offline. Semua lagu di sini gratis &amp; legal dari Internet Archive.</p>
+    <div class="big">🌙</div>
+  </div>
+  <section>
+    <h3>Mood kamu apa?</h3>
+    <div class="chips" id="mood-chips">
+      <div class="chip active" data-q="lofi">Lo-fi Santai</div>
+      <div class="chip" data-q="jazz">Jazz</div>
+      <div class="chip" data-q="classical piano">Klasik Piano</div>
+      <div class="chip" data-q="electronic">Elektronik</div>
+      <div class="chip" data-q="acoustic guitar">Akustik</div>
+      <div class="chip" data-q="chill">Chill</div>
+    </div>
+  </section>
+  <section>
+    <h3 id="home-title">Paling banyak diputar</h3>
+    <div id="home-list"><div class="status">Lagi ngambil lagu… 🌙</div></div>
+  </section>
+</div>
+
+<!-- SEARCH -->
+<div id="view-search" class="view">
+  <div class="searchbox">
+    <input id="q" type="text" placeholder="Cari lagu atau penyanyi…" enterkeyhint="search">
+    <button id="btn-search">Cari</button>
+  </div>
+  <section>
+    <div id="search-list"><div class="status">Ketik judul lagu atau nama penyanyi, terus tap Cari.<br>Contoh: "beethoven", "jazz", "lofi beats".</div></div>
+  </section>
+</div>
+
+<!-- DOWNLOADS -->
+<div id="view-downloads" class="view">
+  <section>
+    <h3>Unduhan kamu</h3>
+    <div id="dl-list"><div class="status">Lagi ngecek unduhan…</div></div>
+    <div class="status">File lagu tersimpan di folder <b>Download/MoonPlay</b> di HP kamu.<br>Tap tombol ⬇ di lagu mana pun buat download.<br><br><button class="chip" onclick="renderDownloads()">↻ Segarkan daftar</button></div>
+  </section>
+</div>
+
+<!-- PLAYER -->
+<div id="player" class="hidden">
+  <div class="row">
+    <img id="p-cover" alt="">
+    <div id="p-info">
+      <div id="p-title">-</div>
+      <div id="p-artist">-</div>
+    </div>
+    <button class="p-btn" id="p-prev">⏮</button>
+    <button class="p-btn" id="p-play">▶</button>
+    <button class="p-btn" id="p-next">⏭</button>
+    <button class="p-btn" id="p-dl">⬇</button>
+  </div>
+  <input type="range" id="seek" min="0" max="1000" value="0">
+  <div class="times"><span id="t-cur">0:00</span><span id="t-dur">0:00</span></div>
+</div>
+
+<nav>
+  <button id="nav-home" class="active"><span class="ic">🏠</span>Beranda</button>
+  <button id="nav-search"><span class="ic">🔍</span>Cari</button>
+  <button id="nav-downloads"><span class="ic">⬇</span>Unduhan</button>
+</nav>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+const IA_SEARCH = 'https://archive.org/advancedsearch.php';
+const IA_META   = 'https://archive.org/metadata/';
+const IA_DL     = 'https://archive.org/download/';
+const IA_IMG    = 'https://archive.org/services/img/';
+
+const audio = document.getElementById('audio');
+let queue = [];        // current list of tracks
+let current = -1;      // index in queue
+let metaCache = {};    // identifier -> Promise<{url, fileName}>
+
+function fmt(s){ if(!isFinite(s)||s<0) s=0; s=Math.floor(s); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function esc(t){ const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
+
+async function iaSearch(query, rows){
+  const q = '(' + query + ') AND mediatype:audio';
+  const url = IA_SEARCH + '?q=' + encodeURIComponent(q)
+    + '&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=downloads'
+    + '&sort[]=downloads+desc&rows=' + (rows||20) + '&output=json';
+  const r = await fetch(url);
+  const j = await r.json();
+  return (j.response && j.response.docs) || [];
+}
+
+function resolveStream(identifier){
+  if(metaCache[identifier]) return metaCache[identifier];
+  metaCache[identifier] = (async () => {
+    const r = await fetch(IA_META + encodeURIComponent(identifier));
+    const j = await r.json();
+    const files = (j.files || []).filter(f => /\.mp3$/i.test(f.name) && !/_sample/i.test(f.name));
+    files.sort((a,b) => (parseInt(b.size||0) - parseInt(a.size||0)));
+    if(!files.length) return null;
+    const f = files[0];
+    return { url: IA_DL + identifier + '/' + encodeURIComponent(f.name), fileName: f.name };
+  })().catch(() => null);
+  return metaCache[identifier];
+}
+
+function trackRow(track, idx){
+  const cover = IA_IMG + track.identifier;
+  return '<div class="track" data-idx="'+idx+'" onclick="playFromList('+idx+')">'
+    + '<img class="t-cover" loading="lazy" src="'+cover+'" onerror="this.style.visibility=\'hidden\'">'
+    + '<div class="t-info"><div class="t-title">'+esc(track.title || 'Tanpa judul')+'</div>'
+    + '<div class="t-artist">'+esc(track.creator || 'Artis tidak dikenal')+'</div></div>'
+    + '<button class="t-dl" title="Download" onclick="event.stopPropagation();downloadTrack('+idx+')">⬇</button></div>';
+}
+
+function renderList(el, tracks){
+  queue = tracks;
+  el.innerHTML = tracks.length ? tracks.map(trackRow).join('')
+    : '<div class="status">Nggak ada lagu yang ketemu. Coba kata kunci lain ya.</div>';
+}
+
+async function loadHome(query, label){
+  const el = document.getElementById('home-list');
+  document.getElementById('home-title').textContent = label;
+  el.innerHTML = '<div class="status">Lagi ngambil lagu… 🌙</div>';
+  try {
+    const docs = await iaSearch(query || 'mediatype:audio', 20);
+    renderList(el, docs.map(d => ({identifier:d.identifier, title:d.title, creator:d.creator})));
+  } catch(e){
+    el.innerHTML = '<div class="status">Gagal ngambil lagu. Cek internet kamu, terus buka lagi aplikasinya.</div>';
+  }
+}
+
+async function doSearch(){
+  const kw = document.getElementById('q').value.trim();
+  const el = document.getElementById('search-list');
+  if(!kw){ el.innerHTML = '<div class="status">Ketik dulu judul atau penyanyinya ya.</div>'; return; }
+  el.innerHTML = '<div class="status">Nyari "'+esc(kw)+'"… 🔍</div>';
+  try {
+    const docs = await iaSearch('title:(' + kw + ') OR creator:(' + kw + ')', 25);
+    renderList(el, docs.map(d => ({identifier:d.identifier, title:d.title, creator:d.creator})));
+  } catch(e){
+    el.innerHTML = '<div class="status">Pencarian gagal. Cek internet kamu ya.</div>';
+  }
+}
+
+async function playFromList(idx){
+  const track = queue[idx];
+  if(!track) return;
+  current = idx;
+  document.getElementById('player').classList.remove('hidden');
+  document.getElementById('p-title').textContent = track.title || 'Tanpa judul';
+  document.getElementById('p-artist').textContent = track.creator || '';
+  document.getElementById('p-cover').src = IA_IMG + track.identifier;
+  document.getElementById('p-play').textContent = '⏳';
+  document.querySelectorAll('.track').forEach(t => t.classList.toggle('playing', +t.dataset.idx === idx));
+  const stream = await resolveStream(track.identifier);
+  if(!stream){ document.getElementById('p-play').textContent = '▶'; alert('Lagu ini nggak bisa diputar. Coba lagu lain ya.'); return; }
+  track.streamUrl = stream.url; track.fileName = stream.fileName;
+  audio.src = stream.url;
+  audio.play().catch(()=>{});
+}
+
+async function downloadTrack(idx){
+  const track = queue[idx];
+  if(!track) return;
+  const stream = track.streamUrl ? {url: track.streamUrl, fileName: track.fileName} : await resolveStream(track.identifier);
+  if(!stream){ alert('Lagu ini nggak bisa di-download.'); return; }
+  track.streamUrl = stream.url; track.fileName = stream.fileName;
+  const name = (track.title ? track.title.replace(/[\\/:*?"<>|]/g,'_') : stream.fileName.replace(/\.mp3$/i,'')) + '.mp3';
+  if(window.MoonBridge){ MoonBridge.download(stream.url, name); }
+  else { const a=document.createElement('a'); a.href=stream.url; a.download=name; a.click(); }
+}
+
+function step(dir){
+  if(!queue.length) return;
+  let n = current + dir;
+  if(n < 0) n = queue.length - 1;
+  if(n >= queue.length) n = 0;
+  playFromList(n);
+}
+
+function renderDownloads(){
+  const el = document.getElementById('dl-list');
+  if(!window.MoonBridge){ el.innerHTML = '<div class="status">Daftar unduhan cuma muncul di dalam aplikasi.</div>'; return; }
+  let items = [];
+  try { items = JSON.parse(MoonBridge.getDownloads() || '[]'); } catch(e){}
+  if(!items.length){ el.innerHTML = '<div class="status">Belum ada lagu yang kamu download.<br>Tap tombol ⬇ di lagu mana pun buat mulai.</div>'; return; }
+  el.innerHTML = items.map((it,i) =>
+    '<div class="track" onclick="openDl('+i+')"><div class="t-cover" style="display:flex;align-items:center;justify-content:center;font-size:22px">🎵</div>'
+    + '<div class="t-info"><div class="t-title">'+esc(it.title)+'</div><div class="t-artist">Tap buat putar pakai pemutar musik HP</div></div></div>'
+  ).join('');
+  window._dlItems = items;
+}
+function openDl(i){ const it = (window._dlItems||[])[i]; if(it && window.MoonBridge) MoonBridge.openFile(it.uri); }
+
+/* Player wiring */
+const playBtn = document.getElementById('p-play');
+playBtn.onclick = () => { if(audio.paused) audio.play().catch(()=>{}); else audio.pause(); };
+document.getElementById('p-next').onclick = () => step(1);
+document.getElementById('p-prev').onclick = () => step(-1);
+document.getElementById('p-dl').onclick = () => { if(current >= 0) downloadTrack(current); };
+audio.addEventListener('play',  () => playBtn.textContent = '⏸');
+audio.addEventListener('pause', () => playBtn.textContent = '▶');
+audio.addEventListener('ended', () => step(1));
+const seek = document.getElementById('seek');
+audio.addEventListener('timeupdate', () => {
+  if(audio.duration) seek.value = Math.floor(audio.currentTime / audio.duration * 1000);
+  document.getElementById('t-cur').textContent = fmt(audio.currentTime);
+  document.getElementById('t-dur').textContent = fmt(audio.duration);
+});
+seek.addEventListener('input', () => { if(audio.duration) audio.currentTime = seek.value / 1000 * audio.duration; });
+
+/* Nav wiring */
+function show(view){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + view).classList.add('active');
+  if(view === 'downloads') renderDownloads();
+  window.scrollTo(0,0);
+}
+document.getElementById('nav-home').onclick = () => show('home');
+document.getElementById('nav-search').onclick = () => show('search');
+document.getElementById('nav-downloads').onclick = () => show('downloads');
+document.getElementById('btn-search').onclick = doSearch;
+document.getElementById('q').addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
+document.querySelectorAll('#mood-chips .chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('#mood-chips .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    loadHome(chip.dataset.q, chip.textContent);
+  };
+});
+
+loadHome('mediatype:audio', 'Paling banyak diputar');
+</script>
+</body>
+</html>
